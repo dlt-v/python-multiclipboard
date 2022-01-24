@@ -1,6 +1,7 @@
 import sys
 import clipboard
 import json
+import os
 
 
 class bcolors:
@@ -18,6 +19,14 @@ class bcolors:
 
 CACHE_PATH = "clipboard.json"
 
+AVAILABLE_COMMANDS = {
+    "help": 'See available commands.',
+    "save": 'Save content to multiclipboard.',
+    "load": 'Copy content to your clipboard.',
+    "list": 'Show all currently saved clips.',
+    "clear": 'Clear out all clips.'
+}
+
 
 def save_clips(filepath, data):
     with open(filepath, "w") as f:
@@ -33,9 +42,17 @@ def read_clips(filepath):
         return {}
 
 
-def list_clips(clips):
-    for i, (key, clip) in enumerate(clips.items()):
-        print(f'{i}.\t {key}:\t"{clip}"')
+def list_data(data):
+    if len(data) == 0:
+        print(f'{bcolors.COMMENT}No saved clips.{bcolors.ENDC}')
+    for i, (key, value) in enumerate(data.items()):
+        print(
+            f'{bcolors.HEADER}{key}{bcolors.ENDC} {bcolors.OKBLUE}:{bcolors.ENDC} {value}')
+
+
+def clear_clips():
+    if os.path.exists(CACHE_PATH):
+        os.remove(CACHE_PATH)
 
 
 if len(sys.argv) == 2:
@@ -59,7 +76,17 @@ if len(sys.argv) == 2:
                 print(f'{bcolors.WARNING}Error: Key does not exist.{bcolors.ENDC}')
 
         case 'list':
-            list_clips(clips)
+
+            list_data(clips)
+
+        case 'clear':
+            clips = {}
+            clear_clips()
+            print(f'{bcolors.OKBLUE}Clip file cleared!{bcolors.ENDC}')
+
+        case 'help':
+            print(f'{bcolors.COMMENT}Available commands:{bcolors.ENDC}')
+            list_data(AVAILABLE_COMMANDS)
 
         case _:
             print(f'{bcolors.WARNING}Error: Unknown argument.{bcolors.ENDC}')
